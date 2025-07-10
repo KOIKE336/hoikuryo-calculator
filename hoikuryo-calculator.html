@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原村保育料自動計算ツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1f2937;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+        }
+        
+        .section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .method-section { background-color: #f9fafb; }
+        .spouse-a { background-color: #eff6ff; }
+        .spouse-b { background-color: #f0fdf4; }
+        .child-section { background-color: #fffbeb; }
+        .notice-section { background-color: #fef2f2; border-left: 4px solid #dc2626; }
+        
+        h2, h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .form-grid.two-cols {
+                grid-template-columns: 1fr 1fr;
+            }
+            .form-grid.three-cols {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        @media (min-width: 640px) {
+            .radio-group {
+                flex-direction: row;
+            }
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .radio-item input {
+            margin-right: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        
+        @media (min-width: 640px) {
+            .button-group {
+                flex-direction: row;
+            }
+        }
+        
+        button {
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background-color: #1d4ed8;
+        }
+        
+        .btn-primary:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #4b5563;
+        }
+        
+        .errors {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .errors h4 {
+            color: #991b1b;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .errors ul {
+            color: #b91c1c;
+            font-size: 0.875rem;
+            list-style: none;
+        }
+        
+        .errors li::before {
+            content: "• ";
+        }
+        
+        .result-card {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(to right, #eff6ff, #f0fdf4);
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .result-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+        }
+        
+        .result-label {
+            font-size: 1.125rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+        }
+        
+        .result-details {
+            font-size: 0.875rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+        }
+        
+        .result-details > div {
+            margin-bottom: 0.25rem;
+        }
+        
+        .btn-copy {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #16a34a;
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .btn-copy:hover {
+            background-color: #15803d;
+        }
+        
+        .notice-section h4 {
+            color: #991b1b;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .notice-section ul {
+            color: #b91c1c;
+            font-size: 0.875rem;
+            list-style: none;
+        }
+        
+        .notice-section li::before {
+            content: "• ";
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>原村保育料自動計算ツール</h1>
+        
+        <form id="hoikuryoForm">
+            <!-- 計算方式選択 -->
+            <div class="section method-section">
+                <h2>計算方式を選択</h2>
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="calculationMethod" value="salary" checked>
+                        <span>年収＋扶養人数で計算</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="calculationMethod" value="taxableIncome">
+                        <span>所得を直接入力</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- 世帯情報入力 -->
+            <div class="form-grid two-cols">
+                <!-- 配偶者A -->
+                <div class="section spouse-a">
+                    <h3>配偶者A</h3>
+                    <div class="form-group">
+                        <label for="spouseAAmount">年収（万円）</label>
+                        <input type="number" id="spouseAAmount" placeholder="例: 400">
+                    </div>
+                    <div class="form-group" id="spouseADependentsGroup">
+                        <label for="spouseADependents">扶養人数</label>
+                        <select id="spouseADependents">
+                            <option value="0">0人</option>
+                            <option value="1">1人</option>
+                            <option value="2">2人</option>
+                            <option value="3">3人</option>
+                            <option value="4">4人</option>
+                            <option value="5">5人</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 配偶者B -->
+                <div class="section spouse-b">
+                    <h3>配偶者B</h3>
+                    <div class="form-group">
+                        <label for="spouseBAmount">年収（万円）</label>
+                        <input type="number" id="spouseBAmount" placeholder="例: 280">
+                    </div>
+                    <div class="form-group" id="spouseBDependentsGroup">
+                        <label for="spouseBDependents">扶養人数</label>
+                        <select id="spouseBDependents">
+                            <option value="0">0人</option>
+                            <option value="1">1人</option>
+                            <option value="2">2人</option>
+                            <option value="3">3人</option>
+                            <option value="4">4人</option>
+                            <option value="5">5人</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 子供情報 -->
+            <div class="section child-section">
+                <h3>お子様情報</h3>
+                <div class="form-grid three-cols">
+                    <div class="form-group">
+                        <label for="childOrder">第何子</label>
+                        <select id="childOrder">
+                            <option value="1">第1子</option>
+                            <option value="2">第2子</option>
+                            <option value="3">第3子以降</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ageCategory">年齢区分</label>
+                        <select id="ageCategory" disabled>
+                            <option value="under3">3歳未満</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="timeType">保育時間区分</label>
+                        <select id="timeType">
+                            <option value="standard">保育標準時間</option>
+                            <option value="short">保育短時間</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ボタン -->
+            <div class="button-group">
+                <button type="submit" class="btn-primary" id="calculateBtn">
+                    保育料を計算する
+                </button>
+                <button type="button" class="btn-secondary" id="resetBtn">
+                    リセット
+                </button>
+            </div>
+        </form>
+        
+        <!-- エラー表示 -->
+        <div id="errorSection" class="errors hidden">
+            <h4>入力エラー</h4>
+            <ul id="errorList"></ul>
+        </div>
+        
+        <!-- 結果表示 -->
+        <div id="resultSection" class="result-card hidden">
+            <h3>計算結果</h3>
+            <div class="result-amount" id="resultAmount">0円</div>
+            <div class="result-label">月額保育料</div>
+            <div class="result-details" id="resultDetails"></div>
+            <button type="button" class="btn-copy" id="copyBtn">
+                結果をコピー
+            </button>
+        </div>
+        
+        <!-- 注意事項 -->
+        <div class="section notice-section">
+            <h4>ご注意</h4>
+            <ul>
+                <li>この計算結果は概算であり、実際の保育料と異なる場合があります</li>
+                <li>各種控除の詳細は考慮されていません</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 保育料計算の定数とテーブル
+        const BASIC_DEDUCTION = 430000;
+        const DEPENDENT_DEDUCTION = 330000;
+        const MUNICIPAL_TAX_RATE = 0.06;
+        const ADJUSTMENT_RATE = 0.025;
+        const ADJUSTMENT_CAP = 2500;
+        
+        // 給与所得控除テーブル
+        const SALARY_DEDUCTION_TABLE = [
+            { threshold: 0, rate: 0.55, min: 550000 },
+            { threshold: 1625000, rate: 0.4, min: 800000 },
+            { threshold: 1800000, rate: 0.3, min: 440000 },
+            { threshold: 3600000, rate: 0.2, min: 1240000 },
+            { threshold: 6600000, rate: 0.1, min: 1950000 },
+            { threshold: 8500000, rate: 0, min: 1950000 }
+        ];
+        
+        // 保育料テーブル（3歳未満）
+        const FEE_TABLES = {
+            under3_standard: [
+                { min: 0, max: 0, fee_first: 0, fee_second: 0, fee_third: 0 },
+                { min: 1, max: 4800, fee_first: 5500, fee_second: 2750, fee_third: 0 },
+                { min: 4801, max: 9700, fee_first: 11500, fee_second: 5750, fee_third: 0 },
+                { min: 9701, max: 16000, fee_first: 17500, fee_second: 8750, fee_third: 0 },
+                { min: 16001, max: 27000, fee_first: 20500, fee_second: 10250, fee_third: 0 },
+                { min: 27001, max: 39600, fee_first: 30500, fee_second: 15250, fee_third: 0 },
+                { min: 39601, max: 66000, fee_first: 48000, fee_second: 24000, fee_third: 0 },
+                { min: 66001, max: 97000, fee_first: 60000, fee_second: 30000, fee_third: 0 },
+                { min: 97001, max: Infinity, fee_first: 63000, fee_second: 31500, fee_third: 0 }
+            ],
+            under3_short: [
+                { min: 0, max: 0, fee_first: 0, fee_second: 0, fee_third: 0 },
+                { min: 1, max: 4800, fee_first: 5200, fee_second: 2600, fee_third: 0 },
+                { min: 4801, max: 9700, fee_first: 11000, fee_second: 5500, fee_third: 0 },
+                { min: 9701, max: 16000, fee_first: 16500, fee_second: 8250, fee_third: 0 },
+                { min: 16001, max: 27000, fee_first: 19500, fee_second: 9750, fee_third: 0 },
+                { min: 27001, max: 39600, fee_first: 29000, fee_second: 14500, fee_third: 0 },
+                { min: 39601, max: 66000, fee_first: 45500, fee_second: 22750, fee_third: 0 },
+                { min: 66001, max: 97000, fee_first: 56900, fee_second: 28450, fee_third: 0 },
+                { min: 97001, max: Infinity, fee_first: 59800, fee_second: 29900, fee_third: 0 }
+            ]
+        };
+        
+        // DOM要素の取得
+        const form = document.getElementById('hoikuryoForm');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const errorSection = document.getElementById('errorSection');
+        const errorList = document.getElementById('errorList');
+        const resultSection = document.getElementById('resultSection');
+        const resultAmount = document.getElementById('resultAmount');
+        const resultDetails = document.getElementById('resultDetails');
+        
+        // 計算方式変更の処理
+        document.querySelectorAll('input[name="calculationMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const isShowDependents = this.value === 'salary';
+                document.getElementById('spouseADependentsGroup').style.display = isShowDependents ? 'block' : 'none';
+                document.getElementById('spouseBDependentsGroup').style.display = isShowDependents ? 'block' : 'none';
+                
+                // ラベルの更新
+                document.querySelector('label[for="spouseAAmount"]').textContent = 
+                    isShowDependents ? '年収（万円）' : '所得（万円）';
+                document.querySelector('label[for="spouseBAmount"]').textContent = 
+                    isShowDependents ? '年収（万円）' : '所得（万円）';
+            });
+        });
+        
+        // 給与所得の計算
+        function calcSalaryIncome(salary) {
+            for (const bracket of SALARY_DEDUCTION_TABLE) {
+                if (salary >= bracket.threshold) {
+                    const deduction = bracket.rate === 0 ? bracket.min : Math.max(salary * bracket.rate, bracket.min);
+                    return salary - deduction;
+                }
+            }
+            return 0;
+        }
+        
+        // 市町村民税所得割額の計算
+        function calcMunicipalTax(input) {
+            let taxableIncome;
+            
+            if (input.type === 'taxableIncome') {
+                taxableIncome = input.amount;
+            } else {
+                const salaryIncome = calcSalaryIncome(input.amount);
+                taxableIncome = Math.max(
+                    salaryIncome - BASIC_DEDUCTION - input.dependents * DEPENDENT_DEDUCTION,
+                    0
+                );
+            }
+            
+            const rawTax = taxableIncome * MUNICIPAL_TAX_RATE;
+            const personalDiff = BASIC_DEDUCTION;
+            const adjustment = taxableIncome <= 2000000
+                ? Math.min(personalDiff * ADJUSTMENT_RATE, ADJUSTMENT_CAP)
+                : personalDiff * ADJUSTMENT_RATE;
+            
+            return Math.max(rawTax - adjustment, 0);
+        }
+        
+        // 料金テーブルから保育料を検索
+        function lookupFeeFromTable(totalMunicipalTax, feeTable, childOrder) {
+            const tier = feeTable.find(t => totalMunicipalTax >= t.min && totalMunicipalTax <= t.max);
+            if (!tier) return 0;
+            
+            if (childOrder >= 3) return tier.fee_third;
+            if (childOrder === 2) return tier.fee_second;
+            return tier.fee_first;
+        }
+        
+        // 保育料計算
+        function calculateHoikuryo(input) {
+            const taxA = calcMunicipalTax(input.spouseA);
+            const taxB = calcMunicipalTax(input.spouseB);
+            const totalTax = taxA + taxB;
+            
+            const tableName = `${input.ageCategory}_${input.timeType}`;
+            const feeTable = FEE_TABLES[tableName];
+            const finalFee = lookupFeeFromTable(totalTax, feeTable, input.childOrder);
+            const baseFee = lookupFeeFromTable(totalTax, feeTable, 1);
+            
+            return {
+                totalMunicipalTax: totalTax,
+                baseFee,
+                finalFee,
+                childOrder: input.childOrder,
+                ageCategory: input.ageCategory,
+                timeType: input.timeType
+            };
+        }
+        
+        // バリデーション
+        function validateInput() {
+            const errors = [];
+            const calculationMethod = document.querySelector('input[name="calculationMethod"]:checked').value;
+            const spouseAAmount = document.getElementById('spouseAAmount').value;
+            const spouseBAmount = document.getElementById('spouseBAmount').value;
+            const spouseADependents = document.getElementById('spouseADependents').value;
+            const spouseBDependents = document.getElementById('spouseBDependents').value;
+            
+            // 配偶者Aの金額チェック
+            if (!spouseAAmount || spouseAAmount.trim() === '') {
+                errors.push('配偶者Aの金額を入力してください');
+            } else {
+                const amount = parseInt(spouseAAmount);
+                if (isNaN(amount) || amount < 0) {
+                    errors.push('配偶者Aの金額は0以上の数値で入力してください');
+                } else if (amount > 10000) {
+                    errors.push('配偶者Aの金額は10,000万円以下で入力してください');
+                }
+            }
+            
+            // 配偶者Bの金額チェック
+            if (!spouseBAmount || spouseBAmount.trim() === '') {
+                errors.push('配偶者Bの金額を入力してください');
+            } else {
+                const amount = parseInt(spouseBAmount);
+                if (isNaN(amount) || amount < 0) {
+                    errors.push('配偶者Bの金額は0以上の数値で入力してください');
+                } else if (amount > 10000) {
+                    errors.push('配偶者Bの金額は10,000万円以下で入力してください');
+                }
+            }
+            
+            // 扶養人数チェック（給与所得者モードのみ）
+            if (calculationMethod === 'salary') {
+                const dependentsA = parseInt(spouseADependents);
+                const dependentsB = parseInt(spouseBDependents);
+                
+                if (isNaN(dependentsA) || dependentsA < 0 || dependentsA > 10) {
+                    errors.push('配偶者Aの扶養人数は0-10人の範囲で入力してください');
+                }
+                
+                if (isNaN(dependentsB) || dependentsB < 0 || dependentsB > 10) {
+                    errors.push('配偶者Bの扶養人数は0-10人の範囲で入力してください');
+                }
+            }
+            
+            return errors;
+        }
+        
+        // エラー表示
+        function showErrors(errors) {
+            errorList.innerHTML = '';
+            errors.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error;
+                errorList.appendChild(li);
+            });
+            errorSection.classList.remove('hidden');
+        }
+        
+        // エラー非表示
+        function hideErrors() {
+            errorSection.classList.add('hidden');
+        }
+        
+        // 結果表示
+        function showResult(result) {
+            const childOrder = parseInt(document.getElementById('childOrder').value);
+            const timeType = document.getElementById('timeType').value;
+            
+            resultAmount.textContent = result.finalFee.toLocaleString() + '円';
+            
+            const details = `
+                <div>第${childOrder}子 / 3歳未満 / ${timeType === 'standard' ? '保育標準時間' : '保育短時間'}</div>
+                <div>世帯市町村民税所得割額: ${result.totalMunicipalTax.toLocaleString()}円</div>
+                ${result.baseFee !== result.finalFee ? `
+                    <div>
+                        基準額: ${result.baseFee.toLocaleString()}円
+                        ${childOrder === 2 ? ' (第2子半額適用)' : ''}
+                        ${childOrder >= 3 ? ' (第3子以降無料適用)' : ''}
+                    </div>
+                ` : ''}
+            `;
+            
+            resultDetails.innerHTML = details;
+            resultSection.classList.remove('hidden');
+        }
+        
+        // 結果非表示
+        function hideResult() {
+            resultSection.classList.add('hidden');
+        }
+        
+        // 計算処理
+        function handleCalculate(e) {
+            e.preventDefault();
+            
+            hideErrors();
+            hideResult();
+            
+            const errors = validateInput();
+            if (errors.length > 0) {
+                showErrors(errors);
+                return;
+            }
+            
+            try {
+                const calculationMethod = document.querySelector('input[name="calculationMethod"]:checked').value;
+                const spouseAAmount = parseInt(document.getElementById('spouseAAmount').value) * 10000;
+                const spouseBAmount = parseInt(document.getElementById('spouseBAmount').value) * 10000;
+                const spouseADependents = parseInt(document.getElementById('spouseADependents').value);
+                const spouseBDependents = parseInt(document.getElementById('spouseBDependents').value);
+                const childOrder = parseInt(document.getElementById('childOrder').value);
+                const timeType = document.getElementById('timeType').value;
+                
+                const spouseA = calculationMethod === 'salary' 
+                    ? { type: 'salary', amount: spouseAAmount, dependents: spouseADependents }
+                    : { type: 'taxableIncome', amount: spouseAAmount };
+                
+                const spouseB = calculationMethod === 'salary' 
+                    ? { type: 'salary', amount: spouseBAmount, dependents: spouseBDependents }
+                    : { type: 'taxableIncome', amount: spouseBAmount };
+                
+                const input = {
+                    spouseA,
+                    spouseB,
+                    childOrder,
+                    ageCategory: 'under3',
+                    timeType
+                };
+                
+                const result = calculateHoikuryo(input);
+                showResult(result);
+            } catch (error) {
+                showErrors(['計算中にエラーが発生しました。入力内容をご確認ください。']);
+            }
+        }
+        
+        // リセット処理
+        function handleReset() {
+            form.reset();
+            hideErrors();
+            hideResult();
+            
+            // 計算方式リセット時の表示更新
+            document.getElementById('spouseADependentsGroup').style.display = 'block';
+            document.getElementById('spouseBDependentsGroup').style.display = 'block';
+            document.querySelector('label[for="spouseAAmount"]').textContent = '年収（万円）';
+            document.querySelector('label[for="spouseBAmount"]').textContent = '年収（万円）';
+        }
+        
+        // 結果コピー処理
+        function handleCopy() {
+            const childOrder = parseInt(document.getElementById('childOrder').value);
+            const timeType = document.getElementById('timeType').value;
+            const finalFee = resultAmount.textContent;
+            const totalTax = resultDetails.textContent.match(/世帯市町村民税所得割額: (.+?)円/)?.[1] || '';
+            
+            const text = `原村保育料計算結果
+月額保育料: ${finalFee}
+第${childOrder}子 / 3歳未満 / ${timeType === 'standard' ? '保育標準時間' : '保育短時間'}
+世帯市町村民税所得割額: ${totalTax}円`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('結果をコピーしました');
+            }).catch(() => {
+                alert('コピーに失敗しました');
+            });
+        }
+        
+        // イベントリスナーの設定
+        form.addEventListener('submit', handleCalculate);
+        resetBtn.addEventListener('click', handleReset);
+        copyBtn.addEventListener('click', handleCopy);
+    </script>
+</body>
+</html>

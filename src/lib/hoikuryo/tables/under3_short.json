@@ -1,0 +1,65 @@
+[
+  {
+    "min": 0,
+    "max": 0,
+    "fee_first": 0,
+    "fee_second": 0,
+    "fee_third": 0
+  },
+  {
+    "min": 1,
+    "max": 4800,
+    "fee_first": 5500,
+    "fee_second": 2750,
+    "fee_third": 0
+  },
+  {
+    "min": 4801,
+    "max": 9700,
+    "fee_first": 11500,
+    "fee_second": 5750,
+    "fee_third": 0
+  },
+  {
+    "min": 9701,
+    "max": 16000,
+    "fee_first": 17500,
+    "fee_second": 8750,
+    "fee_third": 0
+  },
+  {
+    "min": 16001,
+    "max": 27000,
+    "fee_first": 20500,
+    "fee_second": 10250,
+    "fee_third": 0
+  },
+  {
+    "min": 27001,
+    "max": 39600,
+    "fee_first": 30500,
+    "fee_second": 15250,
+    "fee_third": 0
+  },
+  {
+    "min": 39601,
+    "max": 66000,
+    "fee_first": 48000,
+    "fee_second": 24000,
+    "fee_third": 0
+  },
+  {
+    "min": 66001,
+    "max": 97000,
+    "fee_first": 60000,
+    "fee_second": 30000,
+    "fee_third": 0
+  },
+  {
+    "min": 97001,
+    "max": 999999999,
+    "fee_first": 63000,
+    "fee_second": 31500,
+    "fee_third": 0
+  }
+]
